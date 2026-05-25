@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waveshare RaspRover — Engineering Brief</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222636;
+    --border: #2e3450;
+    --accent: #4f8ef7;
+    --accent2: #7c5de8;
+    --green: #3dd68c;
+    --yellow: #f5c542;
+    --red: #e05c6a;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 0;
+  }
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #0e1230 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 40px 32px;
+  }
+  .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.02em; }
+  .hero h1 span { color: var(--accent); }
+  .hero .subtitle { color: var(--muted); margin-top: 6px; font-size: 1rem; }
+  .meta-row {
+    display: flex; gap: 24px; margin-top: 20px; flex-wrap: wrap;
+  }
+  .chip {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 12px; font-size: 0.78rem;
+    color: var(--muted); font-family: var(--mono);
+  }
+  .chip.green { border-color: var(--green); color: var(--green); background: rgba(61,214,140,0.08); }
+  .chip.yellow { border-color: var(--yellow); color: var(--yellow); background: rgba(245,197,66,0.08); }
+  .chip.red { border-color: var(--red); color: var(--red); background: rgba(224,92,106,0.08); }
+  .chip.blue { border-color: var(--accent); color: var(--accent); background: rgba(79,142,247,0.08); }
+
+  .layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 140px); }
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar h3 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); padding: 0 20px; margin-bottom: 8px; }
+  .sidebar a {
+    display: block; padding: 7px 20px; color: var(--muted); text-decoration: none;
+    font-size: 0.85rem; border-left: 2px solid transparent; transition: all 0.15s;
+  }
+  .sidebar a:hover { color: var(--text); border-color: var(--accent); background: rgba(79,142,247,0.05); }
+  .sidebar .section-gap { margin-bottom: 24px; }
+  .content { padding: 40px 48px 80px; max-width: 1000px; }
+
+  h2 {
+    font-size: 1.45rem; font-weight: 700; margin: 48px 0 16px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  h2:first-child { margin-top: 0; }
+  h3 { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin: 24px 0 10px; }
+  h4 { font-size: 0.9rem; font-weight: 600; color: var(--muted); margin: 16px 0 8px;
+    text-transform: uppercase; letter-spacing: 0.06em; }
+
+  p { margin-bottom: 14px; color: var(--text); }
+
+  .spec-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px; margin: 20px 0;
+  }
+  .spec-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px;
+  }
+  .spec-card h4 { margin-top: 0; font-size: 0.75rem; }
+  .spec-row { display: flex; justify-content: space-between; padding: 5px 0;
+    border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+  .spec-row:last-child { border: none; }
+  .spec-row .label { color: var(--muted); }
+  .spec-row .val { font-family: var(--mono); color: var(--text); font-size: 0.83rem; }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 16px 0;
+    font-size: 0.88rem;
+  }
+  th { background: var(--surface2); color: var(--muted); text-align: left;
+    padding: 10px 14px; border-bottom: 1px solid var(--border); font-weight: 600;
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 9px 14px; border-bottom: 1px solid rgba(46,52,80,0.5);
+    vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  code {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 2px 6px; font-family: var(--mono);
+    font-size: 0.82em; color: #b0c4f8;
+  }
+  pre {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; margin: 16px 0;
+    overflow-x: auto; font-family: var(--mono); font-size: 0.82rem;
+    line-height: 1.6; color: #cdd8f0;
+  }
+  pre .comment { color: var(--muted); }
+  pre .key { color: #f5c542; }
+  pre .val { color: var(--green); }
+  pre .cmd { color: var(--accent); }
+
+  .callout {
+    border-radius: 8px; padding: 16px 20px; margin: 20px 0;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .callout.info { background: rgba(79,142,247,0.08); border-left: 3px solid var(--accent); }
+  .callout.warn { background: rgba(245,197,66,0.08); border-left: 3px solid var(--yellow); }
+  .callout.danger { background: rgba(224,92,106,0.08); border-left: 3px solid var(--red); }
+  .callout.success { background: rgba(61,214,140,0.08); border-left: 3px solid var(--green); }
+  .callout .icon { font-size: 1.1rem; line-height: 1.7; flex-shrink: 0; }
+  .callout .body { font-size: 0.9rem; }
+  .callout .body strong { display: block; margin-bottom: 4px; }
+
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 6px; }
+  li::marker { color: var(--accent); }
+
+  .badge { display: inline-block; border-radius: 4px; padding: 2px 8px;
+    font-size: 0.75rem; font-weight: 600; margin-right: 6px; }
+  .badge.green { background: rgba(61,214,140,0.15); color: var(--green); }
+  .badge.yellow { background: rgba(245,197,66,0.15); color: var(--yellow); }
+  .badge.red { background: rgba(224,92,106,0.15); color: var(--red); }
+  .badge.blue { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .badge.purple { background: rgba(124,93,232,0.15); color: var(--accent2); }
+
+  .task-list { list-style: none; padding: 0; }
+  .task-list li {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; margin-bottom: 10px;
+  }
+  .task-list .num {
+    background: var(--accent); color: #fff; border-radius: 50%;
+    width: 22px; height: 22px; flex-shrink: 0; display: flex;
+    align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;
+    margin-top: 2px;
+  }
+  .task-list .body { flex: 1; }
+  .task-list .title { font-weight: 600; margin-bottom: 2px; }
+  .task-list .desc { font-size: 0.85rem; color: var(--muted); }
+
+  .arch-diagram {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 24px; margin: 20px 0; font-family: var(--mono);
+    font-size: 0.82rem; line-height: 1.9; color: var(--muted);
+  }
+  .arch-diagram .box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 16px; display: inline-block; color: var(--text);
+    margin: 2px;
+  }
+  .arch-diagram .layer { margin: 8px 0; }
+  .arch-diagram .arrow { color: var(--accent); }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .sources { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .sources li { font-size: 0.82rem; }
+  .sources a { color: var(--muted); }
+  .sources a:hover { color: var(--accent); }
+
+  .toc-number { color: var(--accent); font-family: var(--mono); font-size: 0.75rem; margin-right: 4px; }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .content { padding: 24px 20px; }
+    .hero { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1><span>Waveshare RaspRover</span> — Engineering Brief</h1>
+  <div class="subtitle">Platform assessment for sl-robotics / ArmRobotics project</div>
+  <div class="meta-row">
+    <div class="chip blue">ArmRobotics Project</div>
+    <div class="chip">Date: 2026-05-25</div>
+    <div class="chip green">Research Complete</div>
+    <div class="chip yellow">Purchase Not Confirmed</div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="section-gap">
+      <h3>Sections</h3>
+      <a href="#deviations">Key Assumptions / Deviations</a>
+      <a href="#overview">1. Platform Overview</a>
+      <a href="#hardware">2. Hardware Architecture</a>
+      <a href="#software">3. Software Stack</a>
+      <a href="#bringup">4. Bring-Up Plan</a>
+      <a href="#integration">5. ArmRobotics Integration</a>
+      <a href="#risks">6. Risks &amp; Unknowns</a>
+      <a href="#forge-tasks">7. Forge Tasks</a>
+      <a href="#sources">Sources</a>
+    </div>
+  </nav>
+
+  <main class="content">
+
+    <!-- ── KEY ASSUMPTIONS / DEVIATIONS ── -->
+    <section id="deviations">
+      <h2>Key Assumptions / Deviations From Request</h2>
+      <div class="callout warn">
+        <div class="icon">⚠</div>
+        <div class="body">
+          <strong>What was requested vs. what was done</strong>
+          <ul>
+            <li><strong>Requested:</strong> Research starting at the official Waveshare product page
+              (<a href="https://www.waveshare.com/rasprover.htm">waveshare.com/rasprover.htm</a>) and wiki pages.</li>
+            <li><strong>Actual:</strong> The Waveshare domain returned HTTP 403 for all direct fetches (product page + wiki), blocking primary-source extraction.
+              All hardware data was collected from third-party retailer listings (REES52, ThinkRobotics, LinuxGizmos),
+              GitHub source code (<a href="https://github.com/waveshareteam/ugv_rpi">waveshareteam/ugv_rpi</a>,
+              <a href="https://github.com/waveshareteam/ugv_base_ros">ugv_base_ros</a>), and web search aggregates.</li>
+            <li><strong>Impact:</strong> Numerical specs (exact dimensions, battery capacity, pricing USD) and the full wiki tutorial tree were not directly verified.
+              All figures are <em>cross-referenced across multiple independent listings</em> and are expected to be accurate, but should be confirmed against the live wiki before ordering.</li>
+            <li><strong>Validation path:</strong> Open <a href="https://www.waveshare.com/wiki/RaspRover">waveshare.com/wiki/RaspRover</a> in a browser and compare against the spec tables in Section 2 below.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── OVERVIEW ── -->
+    <section id="overview">
+      <h2><span class="toc-number">1.</span> Platform Overview</h2>
+
+      <p>The <strong>Waveshare RaspRover</strong> is a compact, open-source 4-wheel-drive mobile robot platform designed for learning and prototyping AI robotics — covering computer vision, autonomous navigation, SLAM, and manipulation. It is positioned as an affordable research vehicle that accepts a Raspberry Pi 4B or 5 as its "upper computer" (high-level AI/strategy) and uses an onboard ESP32 as the "lower computer" (real-time motion and sensor I/O).</p>
+
+      <p>It occupies a niche between hobby chassis kits (e.g., Elegoo, ELEGOO Otto) and research platforms (e.g., TurtleBot 4): it ships pre-assembled with metal chassis, encoders, IMU, camera, and a web UI, yet exposes raw serial JSON and a full ROS 2 (Humble) stack for custom development.</p>
+
+      <div class="callout info">
+        <div class="icon">ℹ</div>
+        <div class="body">
+          <strong>Naming note</strong>
+          Waveshare sells a family of related platforms — <em>WAVE ROVER</em> (bare chassis, no SBC), <em>RaspRover</em> (Raspberry Pi + 4WD, smaller/slower), and <em>UGV Rover</em> (6-wheel 4WD, faster, same software stack). The RaspRover is the entry-level complete kit. All share the same <code>ugv_rpi</code> software repository.
+        </div>
+      </div>
+
+      <h3>Design Goals (as stated by Waveshare)</h3>
+      <ul>
+        <li>Accessible AI robotics education: JupyterLab + Python tutorials, web UI out-of-the-box</li>
+        <li>Dual-controller separation: RPi handles vision/ML; ESP32 handles real-time motor PID + IMU</li>
+        <li>Expandable research base: LiDAR, robotic arm (RoArm-M2), depth camera, 4G/5G add-ons</li>
+        <li>ROS 2 Humble integration for advanced SLAM and autonomous navigation</li>
+      </ul>
+    </section>
+
+    <!-- ── HARDWARE ── -->
+    <section id="hardware">
+      <h2><span class="toc-number">2.</span> Hardware Architecture</h2>
+
+      <h3>2.1 Compute</h3>
+      <div class="spec-grid">
+        <div class="spec-card">
+          <h4>Upper Computer (host)</h4>
+          <div class="spec-row"><span class="label">Board</span><span class="val">Raspberry Pi 4B or Pi 5</span></div>
+          <div class="spec-row"><span class="label">OS</span><span class="val">Debian Bookworm (64-bit)</span></div>
+          <div class="spec-row"><span class="label">Typical RAM</span><span class="val">4 GB or 8 GB</span></div>
+          <div class="spec-row"><span class="label">Role</span><span class="val">AI vision, strategy, ROS 2</span></div>
+        </div>
+        <div class="spec-card">
+          <h4>Lower Computer (sub-controller)</h4>
+          <div class="spec-row"><span class="label">MCU</span><span class="val">ESP32 (onboard)</span></div>
+          <div class="spec-row"><span class="label">FW</span><span class="val">ugv_base_ros / ugv_base_general</span></div>
+          <div class="spec-row"><span class="label">Link to RPi</span><span class="val">GPIO UART, 115200 baud</span></div>
+          <div class="spec-row"><span class="label">Role</span><span class="val">Motor PID, IMU, servos, LEDs, OLED</span></div>
+        </div>
+      </div>
+
+      <h3>2.2 Drive System</h3>
+      <div class="spec-grid">
+        <div class="spec-card">
+          <h4>Drivetrain</h4>
+          <div class="spec-row"><span class="label">Config</span><span class="val">4WD differential skid-steer</span></div>
+          <div class="spec-row"><span class="label">Motors</span><span class="val">4× N20 encoder DC motors</span></div>
+          <div class="spec-row"><span class="label">Control</span><span class="val">PID closed-loop (ESP32)</span></div>
+          <div class="spec-row"><span class="label">Max speed</span><span class="val">0.65 m/s</span></div>
+          <div class="spec-row"><span class="label">Turn radius</span><span class="val">0 m (in-place rotation)</span></div>
+        </div>
+        <div class="spec-card">
+          <h4>Tires</h4>
+          <div class="spec-row"><span class="label">Diameter</span><span class="val">80 mm</span></div>
+          <div class="spec-row"><span class="label">Width</span><span class="val">42.5 mm</span></div>
+          <div class="spec-row"><span class="label">Material</span><span class="val">Soft anti-skid rubber</span></div>
+          <div class="spec-row"><span class="label">Suspension</span><span class="val">None (rigid chassis)</span></div>
+        </div>
+      </div>
+
+      <h3>2.3 Chassis &amp; Physical</h3>
+      <div class="spec-grid">
+        <div class="spec-card">
+          <h4>Dimensions (PT Pan-Tilt version)</h4>
+          <div class="spec-row"><span class="label">L × W × H</span><span class="val">172.4 × 182.9 × 251.3 mm</span></div>
+          <div class="spec-row"><span class="label">Chassis height</span><span class="val">33.7 mm</span></div>
+          <div class="spec-row"><span class="label">Weight (PT)</span><span class="val">~1330 g (without RPi)</span></div>
+          <div class="spec-row"><span class="label">Frame</span><span class="val">2 mm aluminum alloy</span></div>
+        </div>
+        <div class="spec-card">
+          <h4>Dimensions (Standard / no PT)</h4>
+          <div class="spec-row"><span class="label">L × W × H</span><span class="val">172.4 × 182.9 × 132.1 mm</span></div>
+          <div class="spec-row"><span class="label">Chassis height</span><span class="val">33.7 mm</span></div>
+          <div class="spec-row"><span class="label">Weight</span><span class="val">~1054 g (without RPi)</span></div>
+          <div class="spec-row"><span class="label">Frame</span><span class="val">2 mm aluminum alloy</span></div>
+        </div>
+      </div>
+
+      <h3>2.4 Sensors</h3>
+      <table>
+        <tr><th>Sensor</th><th>Model / Spec</th><th>Interface</th><th>Notes</th></tr>
+        <tr><td>Camera (Pi 4B kit)</td><td>5 MP, 160° FoV CSI</td><td>CSI ribbon</td><td>Fixed on pan-tilt head (PT version)</td></tr>
+        <tr><td>Camera (Pi 5 kit)</td><td>5 MP, 160° FoV USB</td><td>USB</td><td>Pi 5 has different CSI pinout</td></tr>
+        <tr><td>IMU</td><td>ICM20948 (9-axis)</td><td>I2C via ESP32</td><td>Used for camera stabilisation &amp; odometry</td></tr>
+        <tr><td>Battery monitor</td><td>INA219</td><td>I2C via ESP32</td><td>Voltage/current telemetry to upper computer</td></tr>
+        <tr><td>OLED display</td><td>Waveshare OLED</td><td>I2C via ESP32</td><td>Shows IP, status; controlled by T:3 command</td></tr>
+        <tr><td>LiDAR (optional)</td><td>D500 or STL27L</td><td>USB (FE1.1S hub + CH340)</td><td>Mounting holes reserved on chassis; enables SLAM</td></tr>
+        <tr><td>Microphone</td><td>Onboard (audio board)</td><td>I2S</td><td>Used for voice interaction demos</td></tr>
+      </table>
+
+      <h3>2.5 Pan-Tilt Module (PT version)</h3>
+      <div class="spec-grid">
+        <div class="spec-card">
+          <h4>Pan-Tilt Specs</h4>
+          <div class="spec-row"><span class="label">DoF</span><span class="val">2 (pan + tilt)</span></div>
+          <div class="spec-row"><span class="label">Servo model</span><span class="val">ST3215 (bus servo)</span></div>
+          <div class="spec-row"><span class="label">Torque</span><span class="val">20 kg·cm</span></div>
+          <div class="spec-row"><span class="label">Speed</span><span class="val">106 RPM</span></div>
+          <div class="spec-row"><span class="label">Pan range</span><span class="val">±180°</span></div>
+          <div class="spec-row"><span class="label">Tilt range</span><span class="val">−30° to +90°</span></div>
+        </div>
+        <div class="spec-card">
+          <h4>Lighting</h4>
+          <div class="spec-row"><span class="label">LED</span><span class="val">High-brightness fill light</span></div>
+          <div class="spec-row"><span class="label">Control</span><span class="val">PWM via ESP32 (T:132)</span></div>
+          <div class="spec-row"><span class="label">Channels</span><span class="val">IO4 + IO5</span></div>
+        </div>
+      </div>
+
+      <h3>2.6 Power</h3>
+      <div class="callout warn">
+        <div class="icon">⚡</div>
+        <div class="body">
+          <strong>Batteries are NOT included — required for operation</strong>
+          3× 18650 lithium cells (18650 form factor) must be purchased separately. The UPS module supports simultaneous charge + discharge (always-on during charging).
+        </div>
+      </div>
+      <div class="spec-grid">
+        <div class="spec-card">
+          <h4>Power System</h4>
+          <div class="spec-row"><span class="label">UPS module</span><span class="val">3S lithium UPS (onboard)</span></div>
+          <div class="spec-row"><span class="label">Batteries</span><span class="val">3× 18650 (not included)</span></div>
+          <div class="spec-row"><span class="label">Nominal voltage</span><span class="val">~11.1 V (3S)</span></div>
+          <div class="spec-row"><span class="label">Charger</span><span class="val">12.6 V / 2 A adapter (included)</span></div>
+          <div class="spec-row"><span class="label">12V switch</span><span class="val">Yes (for 4G/LiDAR modules)</span></div>
+        </div>
+      </div>
+
+      <h3>2.7 Expansion &amp; Interfaces</h3>
+      <table>
+        <tr><th>Interface</th><th>Details</th><th>Use case</th></tr>
+        <tr><td>GPIO 40-pin extended header</td><td>Full RPi GPIO pass-through</td><td>HATs, custom sensors</td></tr>
+        <tr><td>USB HUB (FE1.1S)</td><td>USB 2.0, on ESP32 board</td><td>LiDAR (CH340 bridge), webcam, etc.</td></tr>
+        <tr><td>CH340 serial bridge</td><td>USB↔UART to ESP32</td><td>Debug console, firmware flash</td></tr>
+        <tr><td>12V switch</td><td>Controlled by ESP32</td><td>LiDAR power, 4G/5G modem</td></tr>
+        <tr><td>M2.5 mounting holes</td><td>On top plate</td><td>D500/STL27L LiDAR, arms, accessories</td></tr>
+        <tr><td>Tactical rail</td><td>On frame sides</td><td>Additional peripherals</td></tr>
+        <tr><td>ESP-NOW</td><td>2.4 GHz Wi-Fi direct</td><td>~100 µs latency inter-robot comms</td></tr>
+        <tr><td>4G/5G expansion</td><td>Via USB + 12V switch</td><td>Remote operation over cellular</td></tr>
+      </table>
+
+      <h3>2.8 Architecture Diagram</h3>
+      <div class="arch-diagram">
+        <div class="layer">
+          <span class="box">Raspberry Pi 4B / Pi 5  (Debian Bookworm)</span>
+          &nbsp;← upper computer: ROS 2 Humble, Flask Web UI, JupyterLab, OpenCV, MediaPipe, PyTorch
+        </div>
+        <div style="margin-left:40px; color:var(--accent)">↕ GPIO UART (115200 baud, JSON framing)</div>
+        <div class="layer">
+          <span class="box">ESP32  (ugv_base_ros firmware)</span>
+          &nbsp;← lower computer: motor PID, IMU (ICM20948), servos, OLED, LEDs, INA219
+        </div>
+        <div style="margin-left:120px; color:var(--muted)">↕ Direct HW drivers</div>
+        <div class="layer">
+          &nbsp;&nbsp;&nbsp;
+          <span class="box">4× N20 encoder motors</span>
+          <span class="box">ST3215 bus servos (PT)</span>
+          <span class="box">IMU</span>
+          <span class="box">OLED</span>
+        </div>
+        <div style="margin-top:12px; margin-left:200px; color:var(--muted)">↕ USB (via HUB + CH340)</div>
+        <div class="layer" style="margin-left:120px;">
+          <span class="box">LiDAR (D500 / STL27L)  [optional]</span>
+          <span class="box">USB camera  [Pi 5 version]</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SOFTWARE STACK ── -->
+    <section id="software">
+      <h2><span class="toc-number">3.</span> Software Stack</h2>
+
+      <h3>3.1 Repositories</h3>
+      <table>
+        <tr><th>Repo</th><th>Location</th><th>Role</th><th>Language</th></tr>
+        <tr>
+          <td><code>ugv_rpi</code></td>
+          <td><a href="https://github.com/waveshareteam/ugv_rpi">github.com/waveshareteam/ugv_rpi</a></td>
+          <td>Upper computer: Flask web app, CV, JupyterLab tutorials, base_ctrl</td>
+          <td>Python, JS, Jupyter</td>
+        </tr>
+        <tr>
+          <td><code>ugv_base_ros</code></td>
+          <td><a href="https://github.com/waveshareteam/ugv_base_ros">github.com/waveshareteam/ugv_base_ros</a></td>
+          <td>Lower computer (ESP32): ROS driver firmware</td>
+          <td>C++ / Arduino</td>
+        </tr>
+      </table>
+
+      <h3>3.2 Upper Computer Software (<code>ugv_rpi</code>)</h3>
+      <p>The upper-computer application stack is Python-based and fully open-source:</p>
+
+      <table>
+        <tr><th>Module</th><th>File</th><th>Purpose</th></tr>
+        <tr><td>Motion control</td><td><code>base_ctrl.py</code></td><td>Serializes JSON commands, queued async dispatch to ESP32</td></tr>
+        <tr><td>Computer vision</td><td><code>cv_ctrl.py</code></td><td>OpenCV + MediaPipe: object track, face detect, gesture, line track</td></tr>
+        <tr><td>Web application</td><td><code>app.py</code></td><td>Flask server on :5000, WebRTC stream, keyboard/gamepad control</td></tr>
+        <tr><td>Audio</td><td><code>audio_ctrl.py</code></td><td>gTTS, PyAudio, shortcut key audio responses</td></tr>
+        <tr><td>Configuration</td><td><code>config.yaml</code></td><td>Robot type, module type, camera params, CV thresholds, serial port</td></tr>
+        <tr><td>ML models</td><td><code>models/</code></td><td>Pre-trained TFLite / TorchScript models for on-device inference</td></tr>
+        <tr><td>Tutorials</td><td><code>tutorial_en/</code></td><td>JupyterLab notebooks (English), covers all subsystems</td></tr>
+      </table>
+
+      <h3>3.3 ESP32 Control Protocol</h3>
+      <p>All commands sent from RPi → ESP32 over UART as UTF-8 JSON lines (newline-terminated, 115200 baud):</p>
+      <pre><span class="comment"># Drive: left/right speed [-255, 255]</span>
+{<span class="key">"T"</span>:<span class="val">1</span>,  <span class="key">"L"</span>:<span class="val">100</span>,  <span class="key">"R"</span>:<span class="val">100</span>}
+
+<span class="comment"># Pan-tilt (gimbal)</span>
+{<span class="key">"T"</span>:<span class="val">133</span>, <span class="key">"X"</span>:<span class="val">0.0</span>, <span class="key">"Y"</span>:<span class="val">0.0</span>, <span class="key">"SPD"</span>:<span class="val">0</span>, <span class="key">"ACC"</span>:<span class="val">0</span>}
+
+<span class="comment"># LED brightness (PWM, 0-255)</span>
+{<span class="key">"T"</span>:<span class="val">132</span>, <span class="key">"IO4"</span>:<span class="val">128</span>, <span class="key">"IO5"</span>:<span class="val">0</span>}
+
+<span class="comment"># OLED text</span>
+{<span class="key">"T"</span>:<span class="val">3</span>,  <span class="key">"lineNum"</span>:<span class="val">0</span>, <span class="key">"Text"</span>:<span class="val">"Hello"</span>}
+
+<span class="comment"># Robot type config (main=2 is RaspRover, module=0 = nothing, 2 = pan-tilt)</span>
+{<span class="key">"T"</span>:<span class="val">900</span>, <span class="key">"main"</span>:<span class="val">2</span>, <span class="key">"module"</span>:<span class="val">2</span>}
+
+<span class="comment"># ESP32 → RPi feedback (type 1003 = emergency status)</span>
+{<span class="key">"T"</span>:<span class="val">1003</span>, ...}</pre>
+
+      <h3>3.4 Key Python Dependencies</h3>
+      <div class="spec-grid">
+        <div class="spec-card">
+          <h4>Core CV / ML</h4>
+          <div class="spec-row"><span class="label">OpenCV</span><span class="val">4.9.0.80</span></div>
+          <div class="spec-row"><span class="label">MediaPipe</span><span class="val">0.10.9</span></div>
+          <div class="spec-row"><span class="label">PyTorch</span><span class="val">2.1.0</span></div>
+          <div class="spec-row"><span class="label">TFLite runtime</span><span class="val">2.14.0</span></div>
+          <div class="spec-row"><span class="label">NumPy</span><span class="val">1.24.2</span></div>
+        </div>
+        <div class="spec-card">
+          <h4>Web / Comms</h4>
+          <div class="spec-row"><span class="label">Flask</span><span class="val">2.2.2</span></div>
+          <div class="spec-row"><span class="label">Flask-SocketIO</span><span class="val">5.3.6</span></div>
+          <div class="spec-row"><span class="label">aiortc (WebRTC)</span><span class="val">1.8.0</span></div>
+          <div class="spec-row"><span class="label">JupyterLab</span><span class="val">4.0.8</span></div>
+        </div>
+        <div class="spec-card">
+          <h4>Hardware</h4>
+          <div class="spec-row"><span class="label">gpiozero</span><span class="val">2.0</span></div>
+          <div class="spec-row"><span class="label">picamera2</span><span class="val">0.3.17</span></div>
+          <div class="spec-row"><span class="label">RPi.GPIO</span><span class="val">0.7.1a4</span></div>
+          <div class="spec-row"><span class="label">PyAudio</span><span class="val">0.2.14</span></div>
+        </div>
+      </div>
+
+      <h3>3.5 ROS 2 Integration</h3>
+      <p>ROS 2 Humble (LTS) is the official supported version. The <code>ugv_base_ros</code> firmware makes the ESP32 behave as a ROS driver node. Documented capabilities include:</p>
+      <ul>
+        <li><strong>2D mapping:</strong> LiDAR-based gmapping / Cartographer SLAM</li>
+        <li><strong>3D mapping:</strong> Depth camera point cloud (requires optional depth camera add-on)</li>
+        <li><strong>Auto navigation:</strong> Nav2 stack integration (costmaps, path planners)</li>
+        <li><strong>Gazebo simulation:</strong> URDF + Gazebo sim described in tutorial series</li>
+        <li><strong>Teleop:</strong> keyboard, gamepad, web UI</li>
+      </ul>
+      <div class="callout info">
+        <div class="icon">ℹ</div>
+        <div class="body">
+          <strong>ROS 2 availability caveat</strong>
+          The ROS 2 feature set is better documented for the <em>UGV Rover</em> (6-wheel) than for RaspRover specifically. Because both run the same <code>ugv_rpi</code>/<code>ugv_base_ros</code> stack, feature parity is expected, but the RaspRover-specific ROS 2 wiki section should be reviewed before assuming full Nav2/SLAM support without LiDAR add-on.
+        </div>
+      </div>
+
+      <h3>3.6 Installation Summary</h3>
+      <pre><span class="comment"># On the Raspberry Pi (pre-flashed SD card, or fresh Debian Bookworm)</span>
+<span class="cmd">git clone</span> https://github.com/waveshareteam/ugv_rpi
+<span class="cmd">cd</span> ugv_rpi
+<span class="cmd">chmod +x</span> setup.sh &amp;&amp; <span class="cmd">sudo ./setup.sh</span>
+<span class="cmd">./autorun.sh</span>       <span class="comment"># configure autostart on boot</span>
+<span class="comment"># Reboot → Pi creates WiFi hotspot → navigate to http://&lt;IP&gt;:5000</span>
+<span class="comment"># JupyterLab:  http://&lt;IP&gt;:8888</span></pre>
+      <p>The SD card shipped with the robot already has the software pre-installed; <code>setup.sh</code> is for fresh installs or updates.</p>
+    </section>
+
+    <!-- ── BRING-UP PLAN ── -->
+    <section id="bringup">
+      <h2><span class="toc-number">4.</span> Practical Bring-Up Plan</h2>
+
+      <h3>4.1 Prerequisites (before first power-on)</h3>
+      <ol>
+        <li><strong>Batteries:</strong> Purchase 3× 18650 lithium cells (e.g., Samsung 25R or equivalent, ≥2500 mAh, with protection circuit). These are mandatory — the robot will not run without them.</li>
+        <li><strong>Raspberry Pi:</strong> Not included in the "Acce" (accessories-only) variant. Pi 5 4 GB is recommended for performance margin. Confirm the kit variant purchased.</li>
+        <li><strong>MicroSD (if fresh Pi):</strong> 32+ GB Class 10. Use the Waveshare pre-flashed image for fastest start, or install Debian Bookworm + <code>ugv_rpi</code> manually.</li>
+        <li><strong>Network:</strong> The robot auto-creates a WiFi hotspot on first boot. Have a laptop/phone to connect to it. Alternatively, pre-configure <code>wpa_supplicant.conf</code> to join your lab network.</li>
+      </ol>
+
+      <h3>4.2 First Boot Checklist</h3>
+      <table>
+        <tr><th>#</th><th>Step</th><th>Expected outcome</th><th>Verify</th></tr>
+        <tr><td>1</td><td>Insert batteries and plug in Pi, power on</td><td>OLED shows IP address</td><td>OLED lit, green LED on ESP32</td></tr>
+        <tr><td>2</td><td>Connect to robot WiFi hotspot or local network</td><td>Ping robot IP responds</td><td><code>ping &lt;IP&gt;</code></td></tr>
+        <tr><td>3</td><td>Open <code>http://&lt;IP&gt;:5000</code> in browser</td><td>Web UI loads with live camera feed</td><td>Camera feed visible</td></tr>
+        <tr><td>4</td><td>Test WASD keyboard drive in web UI</td><td>All 4 wheels spin correctly</td><td>Wheels turn on key press</td></tr>
+        <tr><td>5</td><td>Test pan-tilt in web UI (PT version)</td><td>Camera head moves smoothly</td><td>No servo stutter</td></tr>
+        <tr><td>6</td><td>Open JupyterLab at <code>:8888</code>, run first notebook</td><td>Tutorial 1 (intro) completes without error</td><td>Cell output OK</td></tr>
+        <tr><td>7</td><td>SSH into Pi; check UART: <code>ls /dev/ttyS*</code></td><td>Serial device present</td><td><code>/dev/ttyS0</code> or <code>/dev/serial0</code></td></tr>
+        <tr><td>8</td><td>Send manual JSON: <code>echo '{"T":1,"L":0,"R":0}' &gt; /dev/serial0</code></td><td>No movement (zero speed), confirms link</td><td>No error in app.py logs</td></tr>
+      </table>
+
+      <h3>4.3 Calibration Needs</h3>
+      <table>
+        <tr><th>Subsystem</th><th>Calibration required?</th><th>Method</th></tr>
+        <tr><td>Wheel odometry</td><td>Optional (PID tuned in firmware)</td><td>Measure actual distance per command unit; tune PID gains in ESP32 config</td></tr>
+        <tr><td>IMU (ICM20948)</td><td>Yes — magnetometer + gyro bias</td><td>JupyterLab IMU calibration notebook; robot must be placed on flat surface</td></tr>
+        <tr><td>Pan-tilt zero position</td><td>Yes</td><td>Send <code>{"T":133,"X":0,"Y":0,"SPD":0,"ACC":0}</code> and adjust physical mid-position screws if needed; or use bus servo mid-calibration command</td></tr>
+        <tr><td>Camera intrinsics</td><td>If doing metric CV</td><td>Standard checkerboard calibration (OpenCV or the built-in calibration notebook)</td></tr>
+        <tr><td>LiDAR (if added)</td><td>Yes — extrinsic transform</td><td>Measure LiDAR position relative to wheel center; input into ROS URDF/TF</td></tr>
+        <tr><td>Color tracking HSV</td><td>Yes — environment-specific</td><td>Tune HSV bounds in <code>config.yaml</code> under CV parameters</td></tr>
+      </table>
+
+      <h3>4.4 Verified Control Interfaces</h3>
+      <ul>
+        <li><strong>Web UI:</strong> Browser at <code>:5000</code> — keyboard, gamepad, mouse</li>
+        <li><strong>Python direct serial:</strong> Import <code>base_ctrl.py</code>, instantiate <code>BaseController</code>, call <code>send_speed(left, right)</code></li>
+        <li><strong>REST API:</strong> Flask exposes HTTP endpoints for motion commands (documented in tutorial notebooks)</li>
+        <li><strong>ROS 2 topics:</strong> Once ROS driver active, standard <code>/cmd_vel</code>, <code>/odom</code>, <code>/scan</code> topics</li>
+        <li><strong>JupyterLab:</strong> Interactive notebook control at <code>:8888</code></li>
+        <li><strong>Wireless gamepad:</strong> Included USB gamepad works out of the box</li>
+      </ul>
+
+      <h3>4.5 What to Verify First</h3>
+      <ol>
+        <li><strong>Serial link health:</strong> Send a speed command and confirm JSON echo from ESP32. This is the most critical path — all motor, servo, and sensor data flows here.</li>
+        <li><strong>Motor direction:</strong> Verify left/right motor conventions match config. On skid-steer, flipped motor wiring causes circular motion instead of straight driving.</li>
+        <li><strong>IMU axes:</strong> Confirm ICM20948 orientation (X/Y/Z) relative to robot frame matches <code>config.yaml</code> settings and any URDF files.</li>
+        <li><strong>Camera FoV &amp; focus:</strong> At 160° FoV, verify there's no excessive barrel distortion in calibration use cases; the wide angle may need undistortion for precise measurements.</li>
+        <li><strong>Power budget:</strong> Monitor INA219 current with all subsystems active. N20 motors + RPi 5 + servos under load may approach or exceed the UPS module's continuous output.</li>
+      </ol>
+    </section>
+
+    <!-- ── INTEGRATION ── -->
+    <section id="integration">
+      <h2><span class="toc-number">5.</span> ArmRobotics Integration Considerations</h2>
+
+      <p>The existing <code>sl-robotics-dev1</code> codebase targets a <strong>stationary Nova5 / arm101 arm</strong> with RealSense D435i and has a mature Python stack (Pinocchio IK, PyQt5 GUI, ROS2 optional). The RaspRover represents a <em>mobile manipulation</em> addition — a rover that can carry a camera (and potentially a small arm) to objects, rather than objects being placed in front of a fixed arm.</p>
+
+      <h3>5.1 Overlap with Existing Stack</h3>
+      <table>
+        <tr><th>Component</th><th>Existing repo</th><th>RaspRover equivalent</th><th>Compatibility</th></tr>
+        <tr><td>Vision</td><td><code>src/vision/</code> — RealSense + HSV</td><td><code>cv_ctrl.py</code> — 5MP USB + OpenCV</td><td>Divergent — RealSense gives depth; RaspRover camera is RGB only</td></tr>
+        <tr><td>Config</td><td><code>robot_config.yaml</code> + deep merge</td><td><code>config.yaml</code> (flat)</td><td>Compatible pattern; can merge into unified config</td></tr>
+        <tr><td>Robot driver</td><td><code>src/robot/dobot_api.py</code> — TCP/IP</td><td><code>base_ctrl.py</code> — UART JSON</td><td>Different protocol; both wrap a serial-like abstraction</td></tr>
+        <tr><td>Logging</td><td><code>src/logger.py</code></td><td>Standard Python logging</td><td>Trivial to integrate</td></tr>
+        <tr><td>ROS 2</td><td>Optional (CLAUDE.md mentions ROS2 docker)</td><td>Native on Pi (Humble)</td><td>Aligns well; both Humble</td></tr>
+        <tr><td>GUI</td><td>PyQt5 unified GUI</td><td>Flask web UI</td><td>Parallel paths; Flask is lighter-weight for rover</td></tr>
+      </table>
+
+      <h3>5.2 New Dependencies to Add to <code>requirements.txt</code></h3>
+      <pre><span class="comment"># Rover control (serial JSON to ESP32)</span>
+pyserial>=3.5
+
+<span class="comment"># If running RaspRover software on development host (not on Pi)</span>
+<span class="comment"># Most ugv_rpi deps already overlap (opencv, numpy, flask)</span>
+
+<span class="comment"># For LiDAR (if D500/STL27L added)</span>
+rplidar-robotics>=0.9.2  <span class="comment"># or per Waveshare ROS2 instructions</span></pre>
+
+      <h3>5.3 Suggested Integration Pattern</h3>
+      <p>Rather than merging the RaspRover software wholesale into <code>sl-robotics-dev1</code>, the recommended approach is:</p>
+      <ol>
+        <li>Add a <code>src/robot/rasprover_api.py</code> driver following the same abstraction as <code>dobot_api.py</code> — wraps serial JSON commands as Python methods (<code>move(speed_l, speed_r)</code>, <code>set_pan_tilt(x, y)</code>, <code>get_imu()</code>)</li>
+        <li>Register <code>robot_type: rasprover</code> in <code>robot_config.yaml</code> and extend <code>connect_robot()</code> in <code>config_loader.py</code></li>
+        <li>Add a <code>--view rasprover_control</code> panel in the unified PyQt5 GUI</li>
+        <li>Treat the RaspRover's built-in web UI (<code>:5000</code>) as a diagnostic tool, not the primary control path in our repo</li>
+      </ol>
+    </section>
+
+    <!-- ── RISKS ── -->
+    <section id="risks">
+      <h2><span class="toc-number">6.</span> Risks, Unknowns &amp; Assumptions</h2>
+
+      <table>
+        <tr><th>Category</th><th>Item</th><th>Severity</th><th>Mitigation</th></tr>
+        <tr>
+          <td>Purchase</td>
+          <td>Hardware not yet confirmed purchased / in hand</td>
+          <td><span class="badge red">High</span></td>
+          <td>All specifications are from retailer listings; confirm against physical unit. Price ~$220–230 USD (without Pi); add ~$60–80 for Pi 5 4 GB, ~$10 for 18650 cells.</td>
+        </tr>
+        <tr>
+          <td>Software</td>
+          <td><code>v4l2.py</code> conflict breaks camera on first run</td>
+          <td><span class="badge yellow">Medium</span></td>
+          <td>Documented fix: delete conflicting <code>v4l2.py</code> from venv and user site-packages, let system version load.</td>
+        </tr>
+        <tr>
+          <td>Software</td>
+          <td>Waveshare SD card image may be outdated (Bullseye vs Bookworm, older ugv_rpi version)</td>
+          <td><span class="badge yellow">Medium</span></td>
+          <td>Pull latest from GitHub after setup; check <code>git log</code> for recency.</td>
+        </tr>
+        <tr>
+          <td>Hardware</td>
+          <td>Pi 4B vs Pi 5 camera interface difference (CSI vs USB)</td>
+          <td><span class="badge yellow">Medium</span></td>
+          <td>Ensure kit variant matches chosen Pi. Pi 5 kit uses USB camera (no ribbon cable needed, but different <code>picamera2</code> path).</td>
+        </tr>
+        <tr>
+          <td>Hardware</td>
+          <td>N20 motors underpowered for loaded arm integration</td>
+          <td><span class="badge yellow">Medium</span></td>
+          <td>RaspRover is designed as a vision platform, not manipulation base. If adding a small arm (e.g., RoArm-M2), verify total weight vs 0.65 m/s speed spec stays adequate.</td>
+        </tr>
+        <tr>
+          <td>Power</td>
+          <td>18650 cells not included; runtime unknown without them</td>
+          <td><span class="badge red">High</span></td>
+          <td>Purchase 3× protected 18650 cells before first test. Estimate runtime: 3S × 2500 mAh = ~28 Wh. RPi 5 + motors ≈ 10–15 W → ~2 hrs typical.</td>
+        </tr>
+        <tr>
+          <td>ROS 2</td>
+          <td>RaspRover ROS 2 tutorials less complete than UGV Rover's</td>
+          <td><span class="badge blue">Low</span></td>
+          <td>Same codebase; UGV Rover PI ROS2 tutorials are largely applicable. Verify robot type config: <code>{"T":900,"main":2,"module":2}</code> for RaspRover+PT.</td>
+        </tr>
+        <tr>
+          <td>Integration</td>
+          <td>Serial port assignment differs between Pi 4B and Pi 5</td>
+          <td><span class="badge blue">Low</span></td>
+          <td><code>ugv_rpi</code> handles this via <code>config.yaml</code> serial port setting. Pi 5 uses <code>/dev/ttyAMA0</code>; Pi 4B may use <code>/dev/ttyS0</code>. Confirm on device.</td>
+        </tr>
+        <tr>
+          <td>Documentation</td>
+          <td>Waveshare wiki blocked 403 during this research; some specs are second-hand</td>
+          <td><span class="badge blue">Low</span></td>
+          <td>Browse wiki from a standard browser to confirm spec tables before ordering and before writing drivers.</td>
+        </tr>
+        <tr>
+          <td>Unknown</td>
+          <td>Exact battery capacity of shipped 3S UPS module not found</td>
+          <td><span class="badge blue">Low</span></td>
+          <td>The UPS is a carrier board only; capacity is determined by the 18650 cells you insert. 2500–3000 mAh per cell recommended.</td>
+        </tr>
+      </table>
+    </section>
+
+    <!-- ── FORGE TASKS ── -->
+    <section id="forge-tasks">
+      <h2><span class="toc-number">7.</span> Recommended First Forge Implementation Tasks</h2>
+
+      <ul class="task-list">
+        <li>
+          <div class="num">1</div>
+          <div class="body">
+            <div class="title"><span class="badge green">S</span> Hardware acquisition &amp; first-boot validation</div>
+            <div class="desc">Purchase RaspRover PT PI5 Kit Acce + Pi 5 4 GB + 3× 18650 cells + 12.6 V charger. Boot, confirm web UI at :5000, WASD drive, camera feed. No code changes needed.</div>
+          </div>
+        </li>
+        <li>
+          <div class="num">2</div>
+          <div class="body">
+            <div class="title"><span class="badge green">S</span> Serial link test script</div>
+            <div class="desc">Write a minimal Python script in <code>scripts/test_rasprover_serial.py</code>: open UART, send stop command, send forward/backward/spin, print IMU JSON feedback. Verify all motors respond correctly and feedback parsing works. This is the foundation for all subsequent integration.</div>
+          </div>
+        </li>
+        <li>
+          <div class="num">3</div>
+          <div class="body">
+            <div class="title"><span class="badge yellow">M</span> Add <code>src/robot/rasprover_api.py</code> driver</div>
+            <div class="desc">Implement a Python class following the same abstraction pattern as <code>dobot_api.py</code>. Methods: <code>connect()</code>, <code>move(L, R)</code>, <code>stop()</code>, <code>set_pan_tilt(x, y, spd)</code>, <code>set_led(io4, io5)</code>, <code>get_imu()</code>, <code>get_battery()</code>. Register as <code>robot_type: rasprover</code> in <code>robot_config.yaml</code>.</div>
+          </div>
+        </li>
+        <li>
+          <div class="num">4</div>
+          <div class="body">
+            <div class="title"><span class="badge yellow">M</span> Unified GUI: RaspRover control view</div>
+            <div class="desc">Add <code>--view rasprover_control</code> to <code>unified_gui_pyqt.py</code>. Include: directional joypad widget (mapped to L/R speed), pan-tilt sliders, LED brightness slider, live camera feed (USB webcam via OpenCV), IMU readout. Pattern after the existing arm101 control view.</div>
+          </div>
+        </li>
+        <li>
+          <div class="num">5</div>
+          <div class="body">
+            <div class="title"><span class="badge yellow">M</span> IMU calibration &amp; odometry pipeline</div>
+            <div class="desc">Run Waveshare's IMU calibration notebook to zero-out ICM20948 biases. Then build a simple dead-reckoning odometry module in <code>src/robot/rasprover_odom.py</code>: integrate wheel encoder counts (via feedback JSON) + IMU to estimate pose. Verify against measured ground truth (mark floor, compare estimated vs actual travel).</div>
+          </div>
+        </li>
+        <li>
+          <div class="num">6</div>
+          <div class="body">
+            <div class="title"><span class="badge red">L</span> Camera + arm101 hand-eye calibration on mobile base</div>
+            <div class="desc">Mount the RealSense D435i on the RaspRover (using GPIO/USB from Pi 5) alongside the existing 5MP camera. Extend <code>src/calibration/</code> to handle a mobile-base extrinsic: rover→camera transform. Use existing hand-eye calibration workflow as starting point. Determine whether depth from RealSense is needed on the rover or if 5MP monocular suffices for rod detection at range.</div>
+          </div>
+        </li>
+        <li>
+          <div class="num">7</div>
+          <div class="body">
+            <div class="title"><span class="badge red">L</span> ROS 2 bring-up: <code>cmd_vel</code> + <code>/scan</code> integration</div>
+            <div class="desc">Install D500 LiDAR on rover. Configure <code>ugv_base_ros</code> ROS driver on ESP32. Write a ROS 2 launch file for the rover in <code>src/ros/rasprover_bringup.launch.py</code>. Verify <code>/cmd_vel</code> drives the rover, <code>/scan</code> publishes LiDAR data. Run a simple SLAM demo with gmapping. This unlocks autonomous navigation for the hackathon pipeline.</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ── SOURCES ── -->
+    <section id="sources">
+      <div class="sources">
+        <h2>Sources</h2>
+        <ul>
+          <li><a href="https://www.waveshare.com/rasprover.htm">Waveshare RaspRover product page</a> — Official product listing (403 blocked during research; cited for reference)</li>
+          <li><a href="https://www.waveshare.com/wiki/RaspRover">Waveshare Wiki: RaspRover</a> — Official wiki (403 blocked; verify specs here directly)</li>
+          <li><a href="https://github.com/waveshareteam/ugv_rpi">GitHub: waveshareteam/ugv_rpi</a> — Upper computer Python application (Flask, CV, JupyterLab tutorials)</li>
+          <li><a href="https://github.com/waveshareteam/ugv_base_ros">GitHub: waveshareteam/ugv_base_ros</a> — ESP32 lower computer ROS firmware</li>
+          <li><a href="https://github.com/waveshareteam/ugv_rpi/blob/main/base_ctrl.py">ugv_rpi/base_ctrl.py</a> — JSON command protocol source code</li>
+          <li><a href="https://github.com/waveshareteam/ugv_rpi/blob/main/config.yaml">ugv_rpi/config.yaml</a> — Robot configuration parameters</li>
+          <li><a href="https://github.com/waveshareteam/ugv_rpi/blob/main/requirements.txt">ugv_rpi/requirements.txt</a> — Python dependency manifest</li>
+          <li><a href="https://thinkrobotics.com/products/rasprover-open-source-4wd-ai-robot">ThinkRobotics: RaspRover FAQ</a> — Dimensions, weight, servo specs, kit variants (primary spec source)</li>
+          <li><a href="https://rees52.com/products/waveshare-rasprover-ai-powered-4wd-robot-with-computer-vision-in-build-pan-tilt-module-suitable-for-raspberry-pi-4b-raspberry-pi-5-rs7334">REES52: RaspRover product listing</a> — Hardware specs, package contents, power specs</li>
+          <li><a href="https://linuxgizmos.com/open-source-4wd-ai-robot-kit-compatible-with-raspberry-pi-models-4-and-5/">LinuxGizmos.com: RaspRover review</a> — Independent technical summary; pricing ($219–$230)</li>
+          <li><a href="https://www.waveshare.com/wiki/UGV_Rover_PI_ROS2">Waveshare Wiki: UGV Rover PI ROS2</a> — ROS 2 Humble documentation (applies to RaspRover same stack)</li>
+          <li><a href="https://www.waveshare.com/d500-lidar-kit.htm">Waveshare D500 LiDAR Kit</a> — Compatible LiDAR add-on specs</li>
+          <li><a href="https://github.com/Raz-2025/WaveShare_UGV_Rover">GitHub: Raz-2025/WaveShare_UGV_Rover</a> — Community integration example with RoArm-M2 + LiDAR + AI camera</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
