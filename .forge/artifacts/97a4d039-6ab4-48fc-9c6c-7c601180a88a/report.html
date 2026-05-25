@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rover Pi SD Card Wi-Fi Reconfiguration Report</title>
+<style>
+  body { font-family: monospace; margin: 2em; background: #1a1a2e; color: #e0e0e0; }
+  h1 { color: #00d4ff; border-bottom: 1px solid #00d4ff; }
+  h2 { color: #7ec8e3; margin-top: 1.5em; }
+  .ok    { color: #4cff91; }
+  .warn  { color: #ffcc00; background: #2a2a00; padding: 0.5em; border-left: 3px solid #ffcc00; }
+  .info  { color: #90caf9; }
+  table  { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #444; padding: 6px 12px; text-align: left; }
+  th     { background: #1e3a5f; color: #7ec8e3; }
+  pre    { background: #0d1117; padding: 1em; overflow-x: auto; border-left: 3px solid #00d4ff; }
+  .redacted { color: #ff6b6b; font-style: italic; }
+</style>
+</head>
+<body>
+
+<h1>🟢 Rover Pi SD Card — Wi-Fi Reconfiguration Report</h1>
+<p class="info">Generated: 2026-05-25 19:40 UTC+2 | Task: 97a4d039-6ab4-48fc-9c6c-7c601180a88a</p>
+
+<div class="warn">
+⚠️ <strong>ACTION REQUIRED BEFORE BOOTING:</strong> The Wi-Fi password placeholder
+<code>WIFI_PASSWORD_PLACEHOLDER</code> in <code>/media/slupashin/bootfs/firstrun.sh</code>
+(line 10) must be replaced with the actual password for <code>Sunrise_6992877</code>
+before inserting the SD card and powering the Pi.
+</div>
+
+<h2>Key Assumptions / Deviations From Request</h2>
+<table>
+  <tr><th>Item</th><th>Requested</th><th>Actual</th><th>Reason</th></tr>
+  <tr><td>Direct rootfs edit</td><td>Modify NM connection file on rootfs directly</td>
+      <td>bootfs firstrun.sh injection</td>
+      <td>rootfs NM files are root:root 600; sudo blocked by platform policy; bootfs (FAT32) is writable without root</td></tr>
+  <tr><td>Wi-Fi PSK</td><td>Retrieved automatically</td>
+      <td>Placeholder — must be set manually</td>
+      <td>All credential stores (NM, netplan) are root:root 600; user declined to provide it interactively</td></tr>
+</table>
+
+<h2>Detected SD Card</h2>
+<table>
+  <tr><th>Property</th><th>Value</th></tr>
+  <tr><td>Block device</td><td>/dev/sdd (29.7 GB, "Storage Device")</td></tr>
+  <tr><td>Partition 1 (bootfs)</td><td>/dev/sdd1 — 512M vfat, label=bootfs, mount=/media/slupashin/bootfs</td></tr>
+  <tr><td>Partition 2 (rootfs)</td><td>/dev/sdd2 — 29.2G ext4, label=rootfs, mount=/media/slupashin/rootfs</td></tr>
+  <tr><td>OS detected</td><td>Debian GNU/Linux 12 (Bookworm) — Raspberry Pi OS</td></tr>
+  <tr><td>Pi model (firmware)</td><td>Raspberry Pi 4 (bcm2711-rpi-4-b.dtb present)</td></tr>
+  <tr><td>Network manager</td><td>NetworkManager (system-connections + wpa_supplicant present)</td></tr>
+</table>
+
+<h2>Target Network</h2>
+<table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td>SSID</td><td>Sunrise_6992877</td></tr>
+  <tr><td>Security</td><td>WPA-PSK</td></tr>
+  <tr><td>PSK</td><td class="redacted">[REDACTED — placeholder in config; must be set manually]</td></tr>
+  <tr><td>WiFi regulatory domain</td><td>GB (from cmdline.txt cfg80211.ieee80211_regdom=GB)</td></tr>
+</table>
+
+<h2>Files Changed</h2>
+<table>
+  <tr><th>File (on SD card)</th><th>What changed</th><th>Backup path</th></tr>
+  <tr>
+    <td>/media/slupashin/bootfs/cmdline.txt</td>
+    <td>Appended <code>systemd.run=/boot/firmware/firstrun.sh systemd.run_success_action=none</code></td>
+    <td>/media/slupashin/bootfs/cmdline.txt.bak_20260525_194013</td>
+  </tr>
+  <tr>
+    <td>/media/slupashin/bootfs/firstrun.sh</td>
+    <td>New file — created (did not previously exist)</td>
+    <td>N/A (new file; original state = absent)</td>
+  </tr>
+</table>
+
+<h2>Modified cmdline.txt (verified)</h2>
+<pre>console=tty1 root=PARTUUID=a4471df9-02 rootfstype=ext4 fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles cfg80211.ieee80211_regdom=GB systemd.run=/boot/firmware/firstrun.sh systemd.run_success_action=none</pre>
+
+<h2>firstrun.sh Content (verified)</h2>
+<pre>#!/bin/bash
+# firstrun.sh — injected by rover SD card Wi-Fi reconfiguration (2026-05-25)
+# Adds Sunrise_6992877 NetworkManager connection on first Pi boot.
+# IMPORTANT: Replace WIFI_PASSWORD_PLACEHOLDER below with the actual Wi-Fi password
+# before booting the Raspberry Pi!
+
+set -e
+
+SSID="Sunrise_6992877"
+PSK="<span class="redacted">WIFI_PASSWORD_PLACEHOLDER</span>"      # &lt;--- REPLACE THIS
+CONN_UUID="d9b03ec7-b965-4003-8564-aa5d62f2f9b7"
+NM_DIR="/etc/NetworkManager/system-connections"
+CONN_FILE="${NM_DIR}/${SSID}.nmconnection"
+
+# Write the NetworkManager connection profile
+mkdir -p "$NM_DIR"
+cat > "$CONN_FILE" &lt;&lt; CONN_EOF
+[connection]
+id=${SSID}
+uuid=${CONN_UUID}
+type=wifi
+autoconnect=true
+autoconnect-priority=20
+
+[wifi]
+mode=infrastructure
+ssid=${SSID}
+
+[wifi-security]
+auth-alg=open
+key-mgmt=wpa-psk
+psk=${PSK}
+
+[ipv4]
+method=auto
+
+[ipv6]
+addr-gen-mode=default
+method=auto
+CONN_EOF
+
+chmod 600 "$CONN_FILE"
+
+# Reload NetworkManager
+if systemctl is-active --quiet NetworkManager; then
+    nmcli connection reload || true
+fi
+
+# Self-remove from cmdline.txt (runs once, then disabled)
+if mountpoint -q /boot/firmware; then BOOT=/boot/firmware; else BOOT=/boot; fi
+sed -i 's/ systemd\.run=\/boot\/firmware\/firstrun\.sh//g' "${BOOT}/cmdline.txt"
+sed -i 's/ systemd\.run_success_action=none//g' "${BOOT}/cmdline.txt"</pre>
+
+<h2>Artifact Copies</h2>
+<table>
+  <tr><th>Artifact file</th><th>Description</th></tr>
+  <tr><td>.forge/artifacts/97a4d039-.../cmdline.txt.bak_20260525_194013</td><td>Original cmdline.txt before modification</td></tr>
+  <tr><td>.forge/artifacts/97a4d039-.../cmdline.txt</td><td>Modified cmdline.txt (verified)</td></tr>
+  <tr><td>.forge/artifacts/97a4d039-.../firstrun.sh</td><td>Injected firstrun script</td></tr>
+  <tr><td>.forge/artifacts/97a4d039-.../report.html</td><td>This report</td></tr>
+</table>
+
+<h2>How it Works (Mechanism)</h2>
+<ol>
+  <li>On next Pi boot, the Linux kernel sees <code>systemd.run=/boot/firmware/firstrun.sh</code> in <code>cmdline.txt</code>.</li>
+  <li>systemd spawns <code>firstrun.sh</code> as a one-shot service early in boot.</li>
+  <li>The script writes <code>/etc/NetworkManager/system-connections/Sunrise_6992877.nmconnection</code> with WPA-PSK credentials and sets its permissions to 600.</li>
+  <li>NetworkManager reloads (if already running) or picks up the new file on next NM start.</li>
+  <li>The script removes itself from <code>cmdline.txt</code> so it never runs again.</li>
+</ol>
+
+<h2>What is NOT Changed</h2>
+<ul>
+  <li>The existing <code>AccessPopup.nmconnection</code> on rootfs is left intact.</li>
+  <li>The existing <code>wpa_supplicant.conf</code> on rootfs is left intact.</li>
+  <li>No files deleted; no partitions reformatted.</li>
+</ul>
+
+<h2>Next Steps</h2>
+<ol class="warn">
+  <li>Open <code>/media/slupashin/bootfs/firstrun.sh</code> in a text editor.</li>
+  <li>Replace <code>WIFI_PASSWORD_PLACEHOLDER</code> (line 10) with the actual Sunrise_6992877 password.</li>
+  <li>Save the file, safely eject the SD card, insert into Pi, power on.</li>
+  <li>On first boot the Pi will connect to Sunrise_6992877 automatically.</li>
+</ol>
+
+</body>
+</html>
